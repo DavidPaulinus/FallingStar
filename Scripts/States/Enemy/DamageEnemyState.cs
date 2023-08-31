@@ -25,9 +25,15 @@ public class DamageEnemyState : State
 
     public override State RunCurrentStateFixedUpdate()
     {
-        var _direction = transform.position.x > PlayerManager.instance.transform.position.x ? 1 : 1;
+        body.velocity = Vector3.zero;
 
-        body.AddForce(new Vector2(x * _direction, y), ForceMode2D.Impulse);
+        var _direction = transform.position.x > PlayerManager.instance.transform.position.x ? 1 : -1;
+
+        if (timeToChanceStateCounter > 0)
+        {
+            body.MovePosition(new Vector2(body.position.x + x/5 * _direction, body.position.y + y/5));
+        }
+
         return this;
     }
 
@@ -40,9 +46,6 @@ public class DamageEnemyState : State
     {
         if (ground.Grounded() && timeToChanceStateCounter <= 0)
         {
-            if (transform.position.x > PlayerManager.instance.transform.position.x) transform.rotation = new Quaternion(0, 0, 0, 0);
-            else transform.rotation = new Quaternion(0, 180, 0, 0);
-
             timeToChanceStateCounter = timeToChanceState;
 
             return nextState;

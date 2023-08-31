@@ -199,7 +199,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""7bc5f0f3-09a3-46a8-98ff-e869e56fe1fd"",
-                    ""path"": ""<Keyboard>/a"",
+                    ""path"": ""<Keyboard>/d"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -210,7 +210,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""41e18c2f-eff5-4797-9da0-2029170e7ce2"",
-                    ""path"": ""<HID::USB gamepad>/button2"",
+                    ""path"": ""<HID::USB gamepad>/button4"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -221,13 +221,13 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             ]
         },
         {
-            ""name"": ""Attack"",
-            ""id"": ""56402ede-6273-4468-901d-57acea34968a"",
+            ""name"": ""Submit"",
+            ""id"": ""7756b9e9-ab55-4a35-999e-656f63a8d2f4"",
             ""actions"": [
                 {
-                    ""name"": ""Attack"",
+                    ""name"": ""Submit"",
                     ""type"": ""Button"",
-                    ""id"": ""de60d38e-e78a-4102-8b2c-72e477f73895"",
+                    ""id"": ""d7d78ad4-a780-4ec0-b810-84a3d11d2efa"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -237,23 +237,73 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             ""bindings"": [
                 {
                     ""name"": """",
-                    ""id"": ""ec445275-a094-4bad-be91-0984078da2cc"",
-                    ""path"": ""<Keyboard>/d"",
+                    ""id"": ""f0c1cee9-f45e-427d-91ce-78187e3b1c10"",
+                    ""path"": ""<Keyboard>/s"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Attack"",
+                    ""action"": ""Submit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""cdf060a1-6bd1-4e52-a0c0-5c0636985771"",
-                    ""path"": ""<HID::USB gamepad>/button4"",
+                    ""id"": ""8442d8d6-c07b-4ce6-86a4-fbe587e8788c"",
+                    ""path"": ""<Keyboard>/enter"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Attack"",
+                    ""action"": ""Submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8f459fde-99a7-4d59-9f50-e1c7b8a0b11d"",
+                    ""path"": ""<HID::USB gamepad>/button3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""UseItem"",
+            ""id"": ""0b7412a0-82e3-42b5-a920-2368a0b9205d"",
+            ""actions"": [
+                {
+                    ""name"": ""Use"",
+                    ""type"": ""Button"",
+                    ""id"": ""3d70007f-4874-41a8-9e60-fc0cd5bb70bc"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""b0f08e15-b707-488b-b387-76d7f4eb4a3f"",
+                    ""path"": ""<HID::USB gamepad>/button2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Use"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e345ca8a-e6a1-4ce4-bd34-cf02adc49020"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Use"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -269,9 +319,12 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         // Dash
         m_Dash = asset.FindActionMap("Dash", throwIfNotFound: true);
         m_Dash_Dash = m_Dash.FindAction("Dash", throwIfNotFound: true);
-        // Attack
-        m_Attack = asset.FindActionMap("Attack", throwIfNotFound: true);
-        m_Attack_Attack = m_Attack.FindAction("Attack", throwIfNotFound: true);
+        // Submit
+        m_Submit = asset.FindActionMap("Submit", throwIfNotFound: true);
+        m_Submit_Submit = m_Submit.FindAction("Submit", throwIfNotFound: true);
+        // UseItem
+        m_UseItem = asset.FindActionMap("UseItem", throwIfNotFound: true);
+        m_UseItem_Use = m_UseItem.FindAction("Use", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -430,51 +483,97 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     }
     public DashActions @Dash => new DashActions(this);
 
-    // Attack
-    private readonly InputActionMap m_Attack;
-    private List<IAttackActions> m_AttackActionsCallbackInterfaces = new List<IAttackActions>();
-    private readonly InputAction m_Attack_Attack;
-    public struct AttackActions
+    // Submit
+    private readonly InputActionMap m_Submit;
+    private List<ISubmitActions> m_SubmitActionsCallbackInterfaces = new List<ISubmitActions>();
+    private readonly InputAction m_Submit_Submit;
+    public struct SubmitActions
     {
         private @PlayerInput m_Wrapper;
-        public AttackActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Attack => m_Wrapper.m_Attack_Attack;
-        public InputActionMap Get() { return m_Wrapper.m_Attack; }
+        public SubmitActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Submit => m_Wrapper.m_Submit_Submit;
+        public InputActionMap Get() { return m_Wrapper.m_Submit; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
         public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(AttackActions set) { return set.Get(); }
-        public void AddCallbacks(IAttackActions instance)
+        public static implicit operator InputActionMap(SubmitActions set) { return set.Get(); }
+        public void AddCallbacks(ISubmitActions instance)
         {
-            if (instance == null || m_Wrapper.m_AttackActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_AttackActionsCallbackInterfaces.Add(instance);
-            @Attack.started += instance.OnAttack;
-            @Attack.performed += instance.OnAttack;
-            @Attack.canceled += instance.OnAttack;
+            if (instance == null || m_Wrapper.m_SubmitActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_SubmitActionsCallbackInterfaces.Add(instance);
+            @Submit.started += instance.OnSubmit;
+            @Submit.performed += instance.OnSubmit;
+            @Submit.canceled += instance.OnSubmit;
         }
 
-        private void UnregisterCallbacks(IAttackActions instance)
+        private void UnregisterCallbacks(ISubmitActions instance)
         {
-            @Attack.started -= instance.OnAttack;
-            @Attack.performed -= instance.OnAttack;
-            @Attack.canceled -= instance.OnAttack;
+            @Submit.started -= instance.OnSubmit;
+            @Submit.performed -= instance.OnSubmit;
+            @Submit.canceled -= instance.OnSubmit;
         }
 
-        public void RemoveCallbacks(IAttackActions instance)
+        public void RemoveCallbacks(ISubmitActions instance)
         {
-            if (m_Wrapper.m_AttackActionsCallbackInterfaces.Remove(instance))
+            if (m_Wrapper.m_SubmitActionsCallbackInterfaces.Remove(instance))
                 UnregisterCallbacks(instance);
         }
 
-        public void SetCallbacks(IAttackActions instance)
+        public void SetCallbacks(ISubmitActions instance)
         {
-            foreach (var item in m_Wrapper.m_AttackActionsCallbackInterfaces)
+            foreach (var item in m_Wrapper.m_SubmitActionsCallbackInterfaces)
                 UnregisterCallbacks(item);
-            m_Wrapper.m_AttackActionsCallbackInterfaces.Clear();
+            m_Wrapper.m_SubmitActionsCallbackInterfaces.Clear();
             AddCallbacks(instance);
         }
     }
-    public AttackActions @Attack => new AttackActions(this);
+    public SubmitActions @Submit => new SubmitActions(this);
+
+    // UseItem
+    private readonly InputActionMap m_UseItem;
+    private List<IUseItemActions> m_UseItemActionsCallbackInterfaces = new List<IUseItemActions>();
+    private readonly InputAction m_UseItem_Use;
+    public struct UseItemActions
+    {
+        private @PlayerInput m_Wrapper;
+        public UseItemActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Use => m_Wrapper.m_UseItem_Use;
+        public InputActionMap Get() { return m_Wrapper.m_UseItem; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(UseItemActions set) { return set.Get(); }
+        public void AddCallbacks(IUseItemActions instance)
+        {
+            if (instance == null || m_Wrapper.m_UseItemActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_UseItemActionsCallbackInterfaces.Add(instance);
+            @Use.started += instance.OnUse;
+            @Use.performed += instance.OnUse;
+            @Use.canceled += instance.OnUse;
+        }
+
+        private void UnregisterCallbacks(IUseItemActions instance)
+        {
+            @Use.started -= instance.OnUse;
+            @Use.performed -= instance.OnUse;
+            @Use.canceled -= instance.OnUse;
+        }
+
+        public void RemoveCallbacks(IUseItemActions instance)
+        {
+            if (m_Wrapper.m_UseItemActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IUseItemActions instance)
+        {
+            foreach (var item in m_Wrapper.m_UseItemActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_UseItemActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public UseItemActions @UseItem => new UseItemActions(this);
     public interface IMoveActions
     {
         void OnMove(InputAction.CallbackContext context);
@@ -484,8 +583,12 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     {
         void OnDash(InputAction.CallbackContext context);
     }
-    public interface IAttackActions
+    public interface ISubmitActions
     {
-        void OnAttack(InputAction.CallbackContext context);
+        void OnSubmit(InputAction.CallbackContext context);
+    }
+    public interface IUseItemActions
+    {
+        void OnUse(InputAction.CallbackContext context);
     }
 }

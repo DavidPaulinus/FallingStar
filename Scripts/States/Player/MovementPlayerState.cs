@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,10 +6,10 @@ using UnityEngine.Windows;
 
 public class MovementPlayerState : State
 {
+    private InputManager input;
     private Rigidbody2D body;
+    private DirtyEffect dirt;
     private Ground ground;
-
-    [SerializeField] private AttackState attackState;
 
     [Space(20)]
     [Header("MOVEMENT CONFIG")]
@@ -18,6 +17,7 @@ public class MovementPlayerState : State
     [SerializeField] private float moveSpAir;
 
     private float x;
+    private float bonusSp;
 
     [Space(20)]
     [Header("JUMP CONFIG")]
@@ -61,27 +61,35 @@ public class MovementPlayerState : State
     [Space(20)]
     [Header("DASH CONFIG")]
     [SerializeField] private DashState dashState;
-    [SerializeField] private float cooldownDashTime;
+    [SerializeField] private float cooldownDashTimeNoHit;
+    [SerializeField] private float cooldownDashTimeHit;
 
-    private float cooldownDashCounter;
+    private float cooldownDashTime;
     private bool dash;
 
     private void Awake()
     {
         ground = GetComponent<Ground>();
         body = GetComponent<Rigidbody2D>();
+        input = GetComponent<InputManager>();
 
+        dirt = GetComponentInChildren<DirtyEffect>();
         wallCollider = GetComponentInChildren<Wall>();
         circleCollider = GetComponentInChildren<CircleCollider2D>();
+
+        cooldownDashTime = cooldownDashTimeNoHit;
     }
 
     public override State RunCurrentStateFixedUpdate()
     {
         var _ground = ground.Grounded();
 
+        //jump dirt effect
+        dirt.StopParticles();
+
         #region MOVEMENT
         var _move = _ground ? moveSpGround : moveSpAir;
-        body.velocity = new Vector2(_move * x, body.velocity.y);
+        body.velocity = new Vector2((_move + bonusSp) * x, body.velocity.y);
         #endregion
 
         #region WALL JUMP
@@ -93,7 +101,7 @@ public class MovementPlayerState : State
             velocity = Vector2.zero;
 
             timeToSlideDownCounter = timeToSlideDown;
-            if (timeToSlideDownCounter <= 0 || InputManager.instance.RetriveYValue() < 0)
+            if (timeToSlideDownCounter <= 0 || input.RetriveYValue() < 0)
             {
                 gravity = .85f;
                 velocity = body.velocity;
@@ -103,12 +111,12 @@ public class MovementPlayerState : State
             if (jump)
             {
                 var _direction = transform.rotation.y == 1 ? 1 : -1;
-                if (-_direction == InputManager.instance.RetriveXValue())
+                if (-_direction == input.RetriveXValue())
                 {
                     velocity = new Vector2(wallClimb.x * _direction, wallClimb.y);
                     jump = false;
                 }
-                else if (InputManager.instance.RetriveXValue() == 0)
+                else if (input.RetriveXValue() == 0)
                 {
                     velocity = new Vector2(wallBounce.x * _direction, wallBounce.y);
                     jump = false;
@@ -116,7 +124,7 @@ public class MovementPlayerState : State
             }
             if (wallStickCounter > 0)
             {
-                if (InputManager.instance.RetriveXValue() != 0)
+                if (input.RetriveXValue() != 0)
                 {
                     wallStickCounter--;
                 }
@@ -148,6 +156,9 @@ public class MovementPlayerState : State
         //buffer
         if (jump)
         {
+            //jump dirt effect
+            if (_ground) dirt.PlayParticles(transform, PlayerManager.instance.FacingDirection());
+
             jump = false;
             bufferCounter = bufferTime;
         }
@@ -160,8 +171,8 @@ public class MovementPlayerState : State
             JumpAction();
         }
 
-        if (InputManager.instance.RetriveHoldingJump() && velo.y > .1f) body.gravityScale = upwardGravityValue;
-        else if ((!InputManager.instance.RetriveHoldingJump() || velo.y < .1f) && gravityCoolDownTime < 0)
+        if (input.RetriveHoldingJump() && velo.y > .1f) body.gravityScale = upwardGravityValue;
+        else if ((!input.RetriveHoldingJump() || velo.y < .1f) && gravityCoolDownTime < 0)
         {
             circleCollider.enabled = true;
             body.gravityScale = downwardGravityValue;
@@ -194,18 +205,14 @@ public class MovementPlayerState : State
         {
             dash = false;
 
-            var _x = InputManager.instance.RetriveXValue();
-            var _y = InputManager.instance.RetriveYValue();
+            var _x = input.RetriveXValue();
+            var _y = input.RetriveYValue();
 
             var _direction = _x == 0 && _y == 0 ? PlayerManager.instance.FacingDirection() : _x;
 
             dashState.SetDashData(_direction, _y);
 
             return dashState;
-        }
-        if (InputManager.instance.RetriveAttack())
-        {
-            return attackState;
         }
 
         return this;
@@ -214,24 +221,22 @@ public class MovementPlayerState : State
     #region INPUTS
     private void Dash()
     {
-        if (InputManager.instance.RetriveDash() && cooldownDashCounter < 0)
+        if (input.RetriveDash() && PlayerManager.instance.cooldownDashCounter < 0)
         {
-            cooldownDashCounter = cooldownDashTime;
+            PlayerManager.instance.cooldownDashCounter = cooldownDashTime;
             dash = true;
 
-        }else if (InputManager.instance.RetriveDash() && cooldownDashCounter > 0) dash = false;
-
-        cooldownDashCounter -= Time.deltaTime;
+        }else if (input.RetriveDash() && PlayerManager.instance.cooldownDashCounter > 0) dash = false;
     }
 
     private void Jump()
     {
-        jump |= InputManager.instance.RetriveJump();
+        jump |= input.RetriveJump();
     }
 
     private void Move()
     {
-        x = InputManager.instance.RetriveXValue();
+        x = input.RetriveXValue();
     }
 
     #endregion
@@ -252,9 +257,24 @@ public class MovementPlayerState : State
         }
     }
 
+    public void IncreaseBonusSp(float amount)
+    {
+        bonusSp += amount;
+    }
+    public void ResetBonusSp()
+    {
+        bonusSp = 0;
+    }
+    public void SetQuickDashCooldown()
+    {
+        cooldownDashTime = cooldownDashTimeHit;
+    }
+    public void SetDeafultDashCooldown()
+    {
+        cooldownDashTime = cooldownDashTimeNoHit;
+    }
     public void SetGravityCooldownTime(float time)
     {
         gravityCoolDownTime = time;
     }
-    
 }

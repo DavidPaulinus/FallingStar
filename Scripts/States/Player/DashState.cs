@@ -3,6 +3,7 @@ using UnityEngine;
 public class DashState : State
 {
     private Rigidbody2D body;
+    [SerializeField] private BoxCollider2D attackBox;
 
     [SerializeField] private MovementPlayerState movementState;
     [SerializeField] private float gravityCoolDownTime;
@@ -39,8 +40,10 @@ public class DashState : State
 
     public override State RunCurrentStateUpdate()
     {
+        attackBox.enabled = true;
         if (dashStayingCounter <= 0)
         {
+            attackBox.enabled = false;
             body.velocity = new Vector2(.5f,.5f);
 
             Physics2D.IgnoreLayerCollision(9, 8, false);

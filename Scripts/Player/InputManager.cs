@@ -2,14 +2,11 @@ using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
-    public static InputManager instance;
-
     private PlayerInput input;
 
     private void Awake()
     {
         input = new PlayerInput();
-        instance = this;
     }
 
     private void OnEnable()
@@ -41,10 +38,5 @@ public class InputManager : MonoBehaviour
     public bool RetriveDash()
     {
         return input.Dash.Dash.WasPressedThisFrame();
-    }
-
-    public bool RetriveAttack()
-    {
-        return input.Attack.Attack.WasPressedThisFrame();
     }
 }

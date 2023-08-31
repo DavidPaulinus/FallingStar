@@ -1,8 +1,9 @@
 using UnityEngine;
 
-public class EnemyManager : MonoBehaviour
+public class EnemyManager : Damageable
 {
-    [SerializeField] private int hp;
+    [HideInInspector] public float hp;
+    [SerializeField] public float MaxHp;
     [SerializeField] private DamageEnemyState damageState;
     [SerializeField] private float moveXDamage;
     [SerializeField] private float moveYDamage;
@@ -11,6 +12,8 @@ public class EnemyManager : MonoBehaviour
 
     private void Awake()
     {
+        hp = MaxHp;
+
         stateManager = GetComponent<StateManager>();
     }
 
@@ -22,7 +25,7 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    public void DoDamage(int damage)
+    public override void DoDamage(int damage)
     {
         hp -= damage;
 
